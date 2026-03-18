@@ -1,28 +1,19 @@
-# Rust build artifacts
+# Rust
 /target
 **/*.rs.bk
-
-# Cargo
 Cargo.lock
-.cargo
 
-# IDE / Editor files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
-# OS generated files
+# OS
 .DS_Store
 Thumbs.db
 
-# Logs
+# Logs and temp
 *.log
-
-# Test outputs
-test-results/
-
-# Temporary files
 *.tmp
 *.temp
