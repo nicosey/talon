@@ -1,0 +1,1 @@
+/Users/nicosey/talon/target/debug/talon: /Users/nicosey/talon/src/config.rs /Users/nicosey/talon/src/executor.rs /Users/nicosey/talon/src/main.rs /Users/nicosey/talon/src/scheduler.rs /Users/nicosey/talon/src/telegram.rs

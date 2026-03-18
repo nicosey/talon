@@ -1,0 +1,4 @@
+telegram_token = "YOUR_BOT_TOKEN_HERE"
+telegram_chat_id = "435026465"
+command = "cd ~/projects/briefing && python3 briefing.py --config config/robotics.json"
+log_level = "info"
