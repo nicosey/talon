@@ -227,13 +227,79 @@ All three use the same `[openai]` config block — just change `url`.
 
 ## Deployment (Mac Mini)
 
+### 1. Install Rust
+
 ```sh
-cargo build --release
-scp target/release/talon config.toml user@mac-mini:~/talon/
-ssh user@mac-mini "cd ~/talon && nohup ./talon &> talon.log &"
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source ~/.cargo/env
 ```
 
-For auto-restart on reboot, add a `launchd` plist or use `nohup` in your login items.
+### 2. Clone and build
+
+```sh
+git clone https://github.com/nicosey/talon
+cd talon
+cargo build --release
+```
+
+The binary is at `target/release/talon` — no runtime dependencies.
+
+### 3. Create `config.toml`
+
+Copy and edit the example, or create it from scratch (see [Setup](#setup) above).
+
+### 4. Run it once to verify
+
+```sh
+./target/release/talon
+```
+
+### 5. Keep it running with launchd
+
+Create `~/Library/LaunchAgents/talon.plist`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>talon</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/you/talon/target/release/talon</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/you/talon</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/you/talon/talon.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/you/talon/talon.log</string>
+</dict>
+</plist>
+```
+
+Replace `/Users/you/talon` with your actual path, then load it:
+
+```sh
+launchctl load ~/Library/LaunchAgents/talon.plist
+```
+
+`RunAtLoad` starts Talon on login. `KeepAlive` restarts it automatically if it crashes.
+
+### Updating
+
+```sh
+cd ~/talon
+git pull
+cargo build --release
+launchctl stop talon && launchctl start talon
+```
 
 ---
 
