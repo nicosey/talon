@@ -150,6 +150,7 @@ mod tests {
                 url: openai_url.to_string(),
                 api_key: None,
             },
+            store_path: String::new(),
             jobs: vec![],
         }
     }

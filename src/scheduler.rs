@@ -5,7 +5,7 @@ use std::str::FromStr;
 use std::time::Duration;
 use tracing::{error, info};
 
-use crate::{agent, config::{AgentConfig, Config}, executor, telegram, web};
+use crate::{agent, config::{AgentConfig, Config}, executor, store, telegram, web};
 
 struct ParsedJob {
     name: String,
@@ -99,12 +99,14 @@ pub async fn start(config: Config, state: web::SharedState) -> Result<()> {
             Ok(output) => {
                 let msg = format!("✅ <b>TEST: {}</b> completed\n\n{}", job.name, output.trim());
                 telegram::send_message(&config.telegram_token, &config.telegram_chat_id, msg).await;
+                store::append(&config.store_path, &job.name, true, output.trim());
                 update_state(&state, &job.name, true, output.trim().to_string(), &job.schedule, tz).await;
             }
             Err(e) => {
                 error!("Test run of '{}' failed: {}", job.name, e);
                 let msg = format!("❌ <b>TEST: {}</b> failed\n\n{}", job.name, e);
                 telegram::send_message(&config.telegram_token, &config.telegram_chat_id, msg).await;
+                store::append(&config.store_path, &job.name, false, &e.to_string());
                 update_state(&state, &job.name, false, e.to_string(), &job.schedule, tz).await;
             }
         }
@@ -125,12 +127,14 @@ pub async fn start(config: Config, state: web::SharedState) -> Result<()> {
                     Ok(output) => {
                         let msg = format!("✅ <b>{}</b> completed\n\n{}", job.name, output.trim());
                         telegram::send_message(&config.telegram_token, &config.telegram_chat_id, msg).await;
+                        store::append(&config.store_path, &job.name, true, output.trim());
                         update_state(&state, &job.name, true, output.trim().to_string(), &job.schedule, tz).await;
                     }
                     Err(e) => {
                         error!("'{}' failed: {}", job.name, e);
                         let msg = format!("❌ <b>{}</b> failed\n\n{}", job.name, e);
                         telegram::send_message(&config.telegram_token, &config.telegram_chat_id, msg).await;
+                        store::append(&config.store_path, &job.name, false, &e.to_string());
                         update_state(&state, &job.name, false, e.to_string(), &job.schedule, tz).await;
                     }
                 }

@@ -6,28 +6,36 @@ mod agent;
 mod config;
 mod executor;
 mod scheduler;
+mod store;
 mod telegram;
 mod web;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    let mock = std::env::args().any(|a| a == "--mock");
+
     let config = config::load()?;
 
     tracing_subscriber::fmt()
         .with_env_filter(&config.log_level)
         .init();
 
-    info!("🦅 Talon started");
-
     let state = web::new_state();
     let web_port = config.web_port;
 
-    let (sched_result, web_result) = tokio::join!(
-        scheduler::start(config, Arc::clone(&state)),
-        web::start(state, web_port),
-    );
+    if mock {
+        info!("🦅 Talon started in mock mode — web UI only, no jobs will run");
+        web::seed_mock_state(&state).await;
+        web::start(state, web_port).await?;
+    } else {
+        info!("🦅 Talon started");
+        let (sched_result, web_result) = tokio::join!(
+            scheduler::start(config, Arc::clone(&state)),
+            web::start(state, web_port),
+        );
+        sched_result?;
+        web_result?;
+    }
 
-    sched_result?;
-    web_result?;
     Ok(())
 }

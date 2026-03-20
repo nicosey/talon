@@ -58,12 +58,15 @@ pub struct Config {
     pub anthropic: AnthropicConfig,
     #[serde(default)]
     pub openai: OpenAiConfig,
+    #[serde(default = "default_store_path")]
+    pub store_path: String,
     pub jobs: Vec<Job>,
 }
 
 fn default_timezone() -> String  { "UTC".to_string() }
 fn default_log_level() -> String { "info".to_string() }
 fn default_web_port() -> u16     { 3030 }
+fn default_store_path() -> String { "history.jsonl".to_string() }
 
 pub fn validate(config: &Config) -> Result<()> {
     for job in &config.jobs {
