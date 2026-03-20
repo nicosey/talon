@@ -115,6 +115,57 @@ Open `http://localhost:3030` to see the dashboard. The JSON feed is available at
 
 ---
 
+## Using Ollama (local models)
+
+Ollama exposes an OpenAI-compatible API, so no API key is needed and nothing leaves your machine.
+
+### 1. Install Ollama and pull a model
+
+```sh
+brew install ollama
+ollama serve          # starts the local server on :11434
+ollama pull qwen3:8b  # or llama3, mistral, phi3, etc.
+```
+
+### 2. Configure `config.toml`
+
+```toml
+[openai]
+url     = "http://localhost:11434/v1"
+api_key = ""   # leave blank — not required for local models
+
+[[jobs]]
+name     = "Daily Digest"
+schedule = "0 0 8 * * * *"   # every day at 08:00
+
+[jobs.agent]
+backend = "ollama"
+model   = "qwen3:8b"
+prompt  = "Give me a 3-bullet summary of the most important tech news today."
+system  = "Be concise. Plain text only. No markdown."
+```
+
+### 3. Test it immediately
+
+```sh
+cargo run -- --mock   # check the dashboard at http://localhost:3030
+cargo run             # real run — fires all jobs once on startup
+```
+
+Talon calls `POST http://localhost:11434/v1/chat/completions`, parses `choices[0].message.content`, and sends the result to Telegram exactly as it would for any other job.
+
+**Supported local model backends:**
+
+| Backend name  | Default URL                       | Auth needed |
+|---------------|-----------------------------------|-------------|
+| `ollama`      | `http://localhost:11434/v1`       | No          |
+| `lmstudio`    | `http://localhost:1234/v1`        | No          |
+| `openai`      | `https://api.openai.com/v1`       | Yes         |
+
+All three use the same `[openai]` config block — just change `url`.
+
+---
+
 ## Deployment (Mac Mini)
 
 ```sh
