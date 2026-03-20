@@ -1,0 +1,15 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark background circle -->
+  <circle cx="60" cy="60" r="60" fill="#0d1117"/>
+  <!-- Talon claws -->
+  <g stroke="#3fb950" stroke-linecap="round" fill="none">
+    <!-- Left talon -->
+    <path d="M38 32 C36 46 30 58 24 74 C21 82 24 92 30 90" stroke-width="7"/>
+    <!-- Centre talon -->
+    <path d="M60 26 C60 42 60 58 62 74 C63 82 68 90 74 88" stroke-width="7"/>
+    <!-- Right talon -->
+    <path d="M82 32 C84 46 90 58 96 74 C99 82 97 92 91 90" stroke-width="7"/>
+    <!-- Foot bar connecting the three -->
+    <path d="M34 34 C45 28 75 28 86 34" stroke-width="9"/>
+  </g>
+</svg>

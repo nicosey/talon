@@ -1,5 +1,7 @@
 # Talon
 
+![Talon logo](logo.svg)
+
 A lightweight cron runner written in Rust. Runs one or more shell commands on configurable cron schedules, sends results to Telegram, and exposes a web dashboard for monitoring.
 
 Built as a simpler alternative to agent-based schedulers — no LLM overhead, no moving parts, just commands that fire on a schedule.
