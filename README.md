@@ -2,9 +2,9 @@
 
 ![Talon logo](logo.svg)
 
-A lightweight cron runner written in Rust. Runs one or more shell commands on configurable cron schedules, sends results to Telegram, and exposes a web dashboard for monitoring.
+A lightweight cron runner written in Rust. Runs shell commands or LLM agent calls on configurable cron schedules, sends results to Telegram, and exposes a web dashboard for monitoring.
 
-Built as a simpler alternative to agent-based schedulers — no LLM overhead, no moving parts, just commands that fire on a schedule.
+Each job is either a shell command or a direct LLM call — with a pluggable backend supporting Anthropic (Claude), OpenAI, Ollama, LM Studio, and any other OpenAI-compatible endpoint.
 
 ---
 
@@ -12,8 +12,9 @@ Built as a simpler alternative to agent-based schedulers — no LLM overhead, no
 
 1. On startup, Talon runs all configured jobs immediately as a smoke test
 2. It polls every minute and fires any job whose cron schedule falls within the current window
-3. stdout/stderr is captured and sent to your Telegram chat — both on success and failure
-4. A live web dashboard at `http://localhost:3030` shows job status, last output, and next run time
+3. Each job runs either a shell command or calls an LLM backend directly
+4. Output is sent to your Telegram chat on both success and failure
+5. A live web dashboard at `http://localhost:3030` shows job status, last output, and next run time
 
 ---
 

@@ -65,13 +65,7 @@ fn default_timezone() -> String  { "UTC".to_string() }
 fn default_log_level() -> String { "info".to_string() }
 fn default_web_port() -> u16     { 3030 }
 
-pub fn load() -> Result<Config> {
-    let content = std::fs::read_to_string("config.toml")
-        .context("config.toml not found. Please create it first.")?;
-
-    let config: Config = toml::from_str(&content).context("Failed to parse config.toml")?;
-
-    // Validate each job has exactly one of command or agent
+pub fn validate(config: &Config) -> Result<()> {
     for job in &config.jobs {
         match (&job.command, &job.agent) {
             (None, None) => anyhow::bail!("Job '{}' must have either 'command' or 'agent'", job.name),
@@ -79,6 +73,165 @@ pub fn load() -> Result<Config> {
             _ => {}
         }
     }
+    Ok(())
+}
 
+pub fn load() -> Result<Config> {
+    let content = std::fs::read_to_string("config.toml")
+        .context("config.toml not found. Please create it first.")?;
+
+    let config: Config = toml::from_str(&content).context("Failed to parse config.toml")?;
+    validate(&config)?;
     Ok(config)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn parse(toml: &str) -> Config {
+        toml::from_str(toml).expect("TOML parse failed")
+    }
+
+    // ── defaults ──────────────────────────────────────────────────────────────
+
+    #[test]
+    fn defaults_applied() {
+        let cfg = parse(r#"
+            telegram_token   = "tok"
+            telegram_chat_id = "123"
+            jobs = []
+        "#);
+        assert_eq!(cfg.timezone, "UTC");
+        assert_eq!(cfg.log_level, "info");
+        assert_eq!(cfg.web_port, 3030);
+        assert_eq!(cfg.openai.url, "http://localhost:11434/v1");
+        assert!(cfg.anthropic.api_key.is_none());
+    }
+
+    #[test]
+    fn explicit_values_override_defaults() {
+        let cfg = parse(r#"
+            telegram_token   = "tok"
+            telegram_chat_id = "123"
+            timezone         = "America/New_York"
+            log_level        = "debug"
+            web_port         = 8080
+            jobs = []
+        "#);
+        assert_eq!(cfg.timezone, "America/New_York");
+        assert_eq!(cfg.log_level, "debug");
+        assert_eq!(cfg.web_port, 8080);
+    }
+
+    // ── job validation ────────────────────────────────────────────────────────
+
+    #[test]
+    fn command_job_is_valid() {
+        let cfg = parse(r#"
+            telegram_token   = "tok"
+            telegram_chat_id = "123"
+            [[jobs]]
+            name     = "test"
+            schedule = "0 0 7 * * * *"
+            command  = "echo hello"
+        "#);
+        assert!(validate(&cfg).is_ok());
+    }
+
+    #[test]
+    fn agent_job_is_valid() {
+        let cfg = parse(r#"
+            telegram_token   = "tok"
+            telegram_chat_id = "123"
+            [[jobs]]
+            name     = "test"
+            schedule = "0 0 7 * * * *"
+            agent    = { backend = "ollama", model = "qwen3:30b", prompt = "hello" }
+        "#);
+        assert!(validate(&cfg).is_ok());
+    }
+
+    #[test]
+    fn job_with_neither_command_nor_agent_fails() {
+        let cfg = parse(r#"
+            telegram_token   = "tok"
+            telegram_chat_id = "123"
+            [[jobs]]
+            name     = "test"
+            schedule = "0 0 7 * * * *"
+        "#);
+        let err = validate(&cfg).unwrap_err().to_string();
+        assert!(err.contains("must have either"), "got: {err}");
+    }
+
+    #[test]
+    fn job_with_both_command_and_agent_fails() {
+        let cfg = parse(r#"
+            telegram_token   = "tok"
+            telegram_chat_id = "123"
+            [[jobs]]
+            name     = "test"
+            schedule = "0 0 7 * * * *"
+            command  = "echo hello"
+            agent    = { backend = "ollama", model = "qwen3:30b", prompt = "hello" }
+        "#);
+        let err = validate(&cfg).unwrap_err().to_string();
+        assert!(err.contains("cannot have both"), "got: {err}");
+    }
+
+    #[test]
+    fn multiple_jobs_all_validated() {
+        let cfg = parse(r#"
+            telegram_token   = "tok"
+            telegram_chat_id = "123"
+            [[jobs]]
+            name     = "good"
+            schedule = "0 0 7 * * * *"
+            command  = "echo ok"
+            [[jobs]]
+            name     = "bad"
+            schedule = "0 0 8 * * * *"
+        "#);
+        let err = validate(&cfg).unwrap_err().to_string();
+        assert!(err.contains("bad"), "got: {err}");
+    }
+
+    #[test]
+    fn empty_jobs_list_is_valid() {
+        let cfg = parse(r#"
+            telegram_token   = "tok"
+            telegram_chat_id = "123"
+            jobs = []
+        "#);
+        assert!(validate(&cfg).is_ok());
+    }
+
+    // ── backend config ────────────────────────────────────────────────────────
+
+    #[test]
+    fn anthropic_api_key_parsed() {
+        let cfg = parse(r#"
+            telegram_token   = "tok"
+            telegram_chat_id = "123"
+            jobs = []
+            [anthropic]
+            api_key = "sk-ant-test"
+        "#);
+        assert_eq!(cfg.anthropic.api_key.as_deref(), Some("sk-ant-test"));
+    }
+
+    #[test]
+    fn openai_url_and_key_parsed() {
+        let cfg = parse(r#"
+            telegram_token   = "tok"
+            telegram_chat_id = "123"
+            jobs = []
+            [openai]
+            url     = "https://api.openai.com/v1"
+            api_key = "sk-openai-test"
+        "#);
+        assert_eq!(cfg.openai.url, "https://api.openai.com/v1");
+        assert_eq!(cfg.openai.api_key.as_deref(), Some("sk-openai-test"));
+    }
 }
