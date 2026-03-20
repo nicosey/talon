@@ -2,7 +2,7 @@
 
 ![Talon logo](logo.svg)
 
-A lightweight cron runner written in Rust. Runs shell commands or LLM agent calls on configurable cron schedules, sends results to Telegram, and exposes a web dashboard for monitoring.
+A lightweight cron runner written in Rust. Runs shell commands or LLM agent calls on a schedule, sends results to Telegram, stores run history locally, and exposes a web dashboard with a built-in chat agent for monitoring and Q&A.
 
 Each job is either a shell command or a direct LLM call — with a pluggable backend supporting Anthropic (Claude), OpenAI, Ollama, LM Studio, and any other OpenAI-compatible endpoint.
 
@@ -14,7 +14,9 @@ Each job is either a shell command or a direct LLM call — with a pluggable bac
 2. It polls every minute and fires any job whose cron schedule falls within the current window
 3. Each job runs either a shell command or calls an LLM backend directly
 4. Output is sent to your Telegram chat on both success and failure
-5. A live web dashboard at `http://localhost:3030` shows job status, last output, and next run time
+5. Each run is appended to `history.jsonl` for persistent local storage
+6. A live web dashboard at `http://localhost:3030` shows job status, last output, and next run time
+7. A **Chat** tab lets you talk to a built-in agent that knows your current job state
 
 ---
 
@@ -85,23 +87,24 @@ system   = "Be concise. Plain text only."
 
 **Config fields:**
 
-| Field                    | Required | Description                                          |
-|--------------------------|----------|------------------------------------------------------|
-| `telegram_token`         | yes      | Bot token from @BotFather                            |
-| `telegram_chat_id`       | yes      | Chat or user ID to receive notifications             |
-| `timezone`               | no       | IANA timezone name, e.g. `Europe/London`             |
-| `log_level`              | no       | Log level: `info`, `debug`, or `warn`                |
-| `web_port`               | no       | Port for the web dashboard (default `3030`)          |
-| `anthropic.api_key`      | no       | Anthropic API key (required for Claude agent jobs)   |
-| `openai.url`             | no       | Base URL for OpenAI-compatible API                   |
-| `openai.api_key`         | no       | API key (leave blank for local models)               |
-| `jobs[].name`            | yes      | Label shown in logs, Telegram, and dashboard         |
-| `jobs[].schedule`        | yes      | Cron expression (7-field, see above)                 |
-| `jobs[].command`         | —        | Shell command (use this or `agent`, not both)        |
-| `jobs[].agent.backend`   | —        | `anthropic`, `openai`, `ollama`, or `lmstudio`       |
-| `jobs[].agent.model`     | —        | Model name, e.g. `claude-haiku-4-5`, `qwen3:30b`     |
-| `jobs[].agent.prompt`    | —        | User prompt sent to the model                        |
-| `jobs[].agent.system`    | —        | Optional system prompt                               |
+| Field                  | Required | Description                                                              |
+|------------------------|----------|--------------------------------------------------------------------------|
+| `telegram_token`       | yes      | Bot token from @BotFather                                                |
+| `telegram_chat_id`     | yes      | Chat or user ID to receive notifications                                 |
+| `timezone`             | no       | IANA timezone name, e.g. `Europe/London`                                 |
+| `log_level`            | no       | Log level: `info`, `debug`, or `warn`                                    |
+| `web_port`             | no       | Port for the web dashboard (default `3030`)                              |
+| `anthropic.api_key`    | no       | Anthropic API key (required for Claude agent jobs)                       |
+| `openai.url`           | no       | Base URL for OpenAI-compatible API                                       |
+| `openai.api_key`       | no       | API key (leave blank for local models)                                   |
+| `store_path`           | no       | Run history file (default `history.jsonl`), set to `""` to disable       |
+| `jobs[].name`          | yes      | Label shown in logs, Telegram, and dashboard                             |
+| `jobs[].schedule`      | yes      | Cron expression (7-field, see above)                                     |
+| `jobs[].command`       | —        | Shell command (use this or `agent`, not both)                            |
+| `jobs[].agent.backend` | —        | `anthropic`, `openai`, `ollama`, or `lmstudio`                           |
+| `jobs[].agent.model`   | —        | Model name, e.g. `claude-haiku-4-5`, `qwen3:30b`                         |
+| `jobs[].agent.prompt`  | —        | User prompt sent to the model                                            |
+| `jobs[].agent.system`  | —        | Optional system prompt                                                   |
 
 ### 3. Run
 
@@ -112,6 +115,27 @@ cargo run
 ```
 
 Open `http://localhost:3030` to see the dashboard. The JSON feed is available at `http://localhost:3030/api/jobs`.
+
+---
+
+## Chat agent
+
+Talon includes a built-in chat agent accessible from the **Chat** tab in the web dashboard. It automatically receives context about your current jobs — their schedules, last run time, and last output — so you can ask questions like:
+
+- *"Why did Morning Summary fail?"*
+- *"Write a cron expression for every weekday at 9am"*
+- *"What did the Robotics Briefing output last time?"*
+
+### Configure in `config.toml`
+
+```toml
+[chat]
+backend = "ollama"              # or "anthropic", "openai", "lmstudio"
+model   = "qwen3:8b"
+system  = "You are Talon's assistant."   # optional — overrides the default system prompt
+```
+
+The chat agent uses the same pluggable backend system as scheduled agent jobs. Conversation history is kept in memory for the session (cleared on restart). No extra dependencies required.
 
 ---
 

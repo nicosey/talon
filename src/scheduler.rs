@@ -27,7 +27,7 @@ async fn execute(job: &ParsedJob, config: &Config) -> Result<String> {
     if let Some(command) = &job.command {
         executor::run_command(command)
     } else if let Some(agent_cfg) = &job.agent {
-        let backend = agent::build_backend(agent_cfg, config)?;
+        let backend = agent::build_backend(&agent_cfg.backend, &agent_cfg.model, config)?;
         agent::run(agent_cfg, backend.as_ref()).await
     } else {
         unreachable!("config validation ensures command or agent is set")
@@ -42,8 +42,8 @@ async fn update_state(
     schedule: &Schedule,
     tz: chrono_tz::Tz,
 ) {
-    let mut statuses = state.write().await;
-    if let Some(entry) = statuses.iter_mut().find(|s| s.name == name) {
+    let mut guard = state.write().await;
+    if let Some(entry) = guard.jobs.iter_mut().find(|s| s.name == name) {
         entry.last_run = Some(Utc::now());
         entry.next_run = schedule.upcoming(tz).next().map(|t| t.with_timezone(&Utc));
         entry.success = Some(success);
@@ -71,9 +71,9 @@ pub async fn start(config: Config, state: web::SharedState) -> Result<()> {
 
     // Populate initial state
     {
-        let mut statuses = state.write().await;
+        let mut guard = state.write().await;
         for job in &jobs {
-            statuses.push(web::JobStatus {
+            guard.jobs.push(web::JobStatus {
                 name: job.name.clone(),
                 schedule: job.raw_schedule.clone(),
                 last_run: None,

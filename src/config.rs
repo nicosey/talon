@@ -42,6 +42,13 @@ impl Default for OpenAiConfig {
     }
 }
 
+#[derive(Deserialize, Clone)]
+pub struct ChatConfig {
+    pub backend: String,
+    pub model: String,
+    pub system: Option<String>,
+}
+
 // ── Top-level config ──────────────────────────────────────────────────────────
 
 #[derive(Deserialize, Clone)]
@@ -58,6 +65,8 @@ pub struct Config {
     pub anthropic: AnthropicConfig,
     #[serde(default)]
     pub openai: OpenAiConfig,
+    #[serde(default)]
+    pub chat: Option<ChatConfig>,
     #[serde(default = "default_store_path")]
     pub store_path: String,
     pub jobs: Vec<Job>,

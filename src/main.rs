@@ -21,17 +21,17 @@ async fn main() -> Result<()> {
         .init();
 
     let state = web::new_state();
-    let web_port = config.web_port;
+    let web_config = Arc::new(config.clone());
 
     if mock {
         info!("🦅 Talon started in mock mode — web UI only, no jobs will run");
         web::seed_mock_state(&state).await;
-        web::start(state, web_port).await?;
+        web::start(state, web_config).await?;
     } else {
         info!("🦅 Talon started");
         let (sched_result, web_result) = tokio::join!(
             scheduler::start(config, Arc::clone(&state)),
-            web::start(state, web_port),
+            web::start(state, web_config),
         );
         sched_result?;
         web_result?;
