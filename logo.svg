@@ -1,15 +1,47 @@
 <svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-  <!-- Dark background circle -->
+  <!-- Background -->
   <circle cx="60" cy="60" r="60" fill="#0d1117"/>
-  <!-- Talon claws -->
-  <g stroke="#3fb950" stroke-linecap="round" fill="none">
-    <!-- Left talon -->
-    <path d="M38 32 C36 46 30 58 24 74 C21 82 24 92 30 90" stroke-width="7"/>
-    <!-- Centre talon -->
-    <path d="M60 26 C60 42 60 58 62 74 C63 82 68 90 74 88" stroke-width="7"/>
-    <!-- Right talon -->
-    <path d="M82 32 C84 46 90 58 96 74 C99 82 97 92 91 90" stroke-width="7"/>
-    <!-- Foot bar connecting the three -->
-    <path d="M34 34 C45 28 75 28 86 34" stroke-width="9"/>
+
+  <g fill="#3fb950">
+    <!-- Ankle stub -->
+    <path d="M53 10 C53 8 67 8 67 10 L65 28 C65 31 62 33 60 33 C58 33 55 31 55 28 Z"/>
+
+    <!-- Foot pad -->
+    <ellipse cx="60" cy="40" rx="27" ry="13"/>
+
+    <!-- Left toe: sweeps down-left, tapers, hooks right -->
+    <path d="
+      M 40 46
+      C 34 54 24 67 16 83
+      C 13 90 14 98 20 100
+      C 25 102 30 98 32 92
+      L 35 82
+      C 39 70 45 58 50 47
+      C 48 43 43 43 40 46 Z"/>
+    <!-- Left claw hook -->
+    <path d="M 18 99 C 13 105 14 113 20 114 C 26 115 31 109 28 102 C 24 104 19 103 18 99 Z"/>
+
+    <!-- Centre toe: straight down, tapers, hooks forward -->
+    <path d="
+      M 54 51
+      C 52 65 50 79 50 91
+      C 50 98 54 103 59 104
+      C 64 105 68 100 68 93
+      C 68 81 66 67 64 53
+      C 62 48 56 47 54 51 Z"/>
+    <!-- Centre claw hook -->
+    <path d="M 50 93 C 46 100 48 109 54 110 C 60 111 64 104 61 97 C 57 100 52 98 50 93 Z"/>
+
+    <!-- Right toe: sweeps down-right, tapers, hooks left -->
+    <path d="
+      M 80 46
+      C 77 43 72 43 70 47
+      C 75 58 81 70 85 82
+      L 88 92
+      C 90 98 95 102 100 100
+      C 106 98 107 90 104 83
+      C 96 67 86 54 80 46 Z"/>
+    <!-- Right claw hook -->
+    <path d="M 102 99 C 101 103 96 104 92 102 C 89 109 94 115 100 114 C 106 113 107 105 102 99 Z"/>
   </g>
 </svg>

@@ -86,12 +86,16 @@ async fn dashboard(State(state): State<SharedState>) -> Html<String> {
 <body>
   <header>
     <div class="logo">
-      <svg width="30" height="30" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
-        <g stroke="#3fb950" stroke-width="2.2" stroke-linecap="round" fill="none">
-          <path d="M8 8 C7 13 5 18 4 23 C3 26 5 27 7 26"/>
-          <path d="M14 6 C14 12 14 18 15 23 C15 26 17 27 19 26"/>
-          <path d="M20 8 C21 13 23 18 24 23 C25 26 23 27 21 26"/>
-          <path d="M6 9 C9 7 19 7 22 9" stroke-width="2.6"/>
+      <svg width="30" height="30" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <g fill="#3fb950">
+          <path d="M53 10 C53 8 67 8 67 10 L65 28 C65 31 62 33 60 33 C58 33 55 31 55 28 Z"/>
+          <ellipse cx="60" cy="40" rx="27" ry="13"/>
+          <path d="M40 46 C34 54 24 67 16 83 C13 90 14 98 20 100 C25 102 30 98 32 92 L35 82 C39 70 45 58 50 47 C48 43 43 43 40 46 Z"/>
+          <path d="M18 99 C13 105 14 113 20 114 C26 115 31 109 28 102 C24 104 19 103 18 99 Z"/>
+          <path d="M54 51 C52 65 50 79 50 91 C50 98 54 103 59 104 C64 105 68 100 68 93 C68 81 66 67 64 53 C62 48 56 47 54 51 Z"/>
+          <path d="M50 93 C46 100 48 109 54 110 C60 111 64 104 61 97 C57 100 52 98 50 93 Z"/>
+          <path d="M80 46 C77 43 72 43 70 47 C75 58 81 70 85 82 L88 92 C90 98 95 102 100 100 C106 98 107 90 104 83 C96 67 86 54 80 46 Z"/>
+          <path d="M102 99 C101 103 96 104 92 102 C89 109 94 115 100 114 C106 113 107 105 102 99 Z"/>
         </g>
       </svg>
       <h1>Talon</h1>
