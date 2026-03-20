@@ -2,6 +2,7 @@ use anyhow::Result;
 use std::sync::Arc;
 use tracing::info;
 
+mod agent;
 mod config;
 mod executor;
 mod scheduler;

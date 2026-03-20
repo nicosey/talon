@@ -44,15 +44,30 @@ timezone         = "Europe/London"   # optional, defaults to UTC
 log_level        = "info"            # optional, defaults to info
 web_port         = 3030              # optional, defaults to 3030
 
+# Required if any job uses backend = "anthropic"
+[anthropic]
+api_key = "sk-ant-..."
+
+# Required if any job uses backend = "openai" or "ollama"
+[openai]
+url     = "http://localhost:11434/v1"  # Ollama, LM Studio, OpenAI, etc.
+api_key = ""                           # leave blank for local models
+
+# Shell job — runs a command
 [[jobs]]
 name     = "Robotics Briefing"
-command  = "cd ~/projects/briefing && python3 briefing.py"
-schedule = "0 0 7 * * * *"          # daily at 07:00
+command  = "cd ~/projects/briefing && python3 briefing.py robotics"
+schedule = "0 0 7 * * * *"            # daily at 07:00
 
+# Agent job — calls an LLM directly
 [[jobs]]
-name     = "Weekly Report"
-command  = "cd ~/projects/reports && python3 report.py"
-schedule = "0 0 9 * * Mon *"        # Mondays at 09:00
+name     = "Morning Summary"
+schedule = "0 30 7 * * * *"           # daily at 07:30
+[jobs.agent]
+backend  = "ollama"                    # or "anthropic", "openai", "lmstudio"
+model    = "qwen3:30b"
+prompt   = "Give me a 3-bullet summary of the most important tech news today."
+system   = "Be concise. Plain text only."
 ```
 
 **Schedule format:** `sec min hour dom month dow year`
@@ -69,16 +84,23 @@ schedule = "0 0 9 * * Mon *"        # Mondays at 09:00
 
 **Config fields:**
 
-| Field              | Required | Description                                 |
-|--------------------|----------|---------------------------------------------|
-| `telegram_token`   | yes      | Bot token from @BotFather                   |
-| `telegram_chat_id` | yes      | Chat or user ID to receive notifications    |
-| `timezone`         | no       | IANA timezone name, e.g. `Europe/London`    |
-| `log_level`        | no       | Log level: `info`, `debug`, or `warn`       |
-| `web_port`         | no       | Port for the web dashboard (default `3030`) |
-| `jobs[].name`      | yes      | Label shown in logs, Telegram, dashboard    |
-| `jobs[].command`   | yes      | Shell command to run                        |
-| `jobs[].schedule`  | yes      | Cron expression (7-field, see above)        |
+| Field                    | Required | Description                                          |
+|--------------------------|----------|------------------------------------------------------|
+| `telegram_token`         | yes      | Bot token from @BotFather                            |
+| `telegram_chat_id`       | yes      | Chat or user ID to receive notifications             |
+| `timezone`               | no       | IANA timezone name, e.g. `Europe/London`             |
+| `log_level`              | no       | Log level: `info`, `debug`, or `warn`                |
+| `web_port`               | no       | Port for the web dashboard (default `3030`)          |
+| `anthropic.api_key`      | no       | Anthropic API key (required for Claude agent jobs)   |
+| `openai.url`             | no       | Base URL for OpenAI-compatible API                   |
+| `openai.api_key`         | no       | API key (leave blank for local models)               |
+| `jobs[].name`            | yes      | Label shown in logs, Telegram, and dashboard         |
+| `jobs[].schedule`        | yes      | Cron expression (7-field, see above)                 |
+| `jobs[].command`         | —        | Shell command (use this or `agent`, not both)        |
+| `jobs[].agent.backend`   | —        | `anthropic`, `openai`, `ollama`, or `lmstudio`       |
+| `jobs[].agent.model`     | —        | Model name, e.g. `claude-haiku-4-5`, `qwen3:30b`     |
+| `jobs[].agent.prompt`    | —        | User prompt sent to the model                        |
+| `jobs[].agent.system`    | —        | Optional system prompt                               |
 
 ### 3. Run
 
