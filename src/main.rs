@@ -1,10 +1,12 @@
 use anyhow::Result;
+use std::sync::Arc;
 use tracing::info;
 
 mod config;
-mod scheduler;
 mod executor;
+mod scheduler;
 mod telegram;
+mod web;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -14,7 +16,17 @@ async fn main() -> Result<()> {
         .with_env_filter(&config.log_level)
         .init();
 
-    info!("🦅 Talon started - Robotics briefing scheduled for 07:00 Europe/London");
+    info!("🦅 Talon started");
 
-    scheduler::start(config).await
+    let state = web::new_state();
+    let web_port = config.web_port;
+
+    let (sched_result, web_result) = tokio::join!(
+        scheduler::start(config, Arc::clone(&state)),
+        web::start(state, web_port),
+    );
+
+    sched_result?;
+    web_result?;
+    Ok(())
 }

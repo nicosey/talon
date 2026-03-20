@@ -1,4 +1,9 @@
-telegram_token = "YOUR_BOT_TOKEN_HERE"
+telegram_token   = "YOUR_BOT_TOKEN_HERE"
 telegram_chat_id = "435026465"
-command = "cd ~/projects/briefing && python3 briefing.py --config config/robotics.json"
-log_level = "info"
+timezone         = "Europe/London"
+log_level        = "info"
+
+[[jobs]]
+name     = "Robotics Briefing"
+command  = "cd ~/projects/briefing && python3 briefing.py --config config/robotics.json"
+schedule = "0 0 7 * * * *"  # daily at 07:00
