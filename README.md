@@ -120,22 +120,57 @@ Open `http://localhost:3030` to see the dashboard. The JSON feed is available at
 
 ## Chat agent
 
-Talon includes a built-in chat agent accessible from the **Chat** tab in the web dashboard. It automatically receives context about your current jobs — their schedules, last run time, and last output — so you can ask questions like:
+Talon includes a built-in chat agent accessible from the **Chat** tab in the web dashboard. It starts automatically with Talon — no separate process, no extra setup beyond adding `[chat]` to your config.
+
+The agent is automatically given context about your jobs on every message:
+
+```text
+Current job status:
+• Robotics Briefing (0 0 7 * * * *): last run succeeded ✅, 2026-03-20 07:00 UTC
+• Morning Summary (0 30 7 * * * *): last run failed ❌, 2026-03-20 07:30 UTC — output: Error: connection refused
+```
+
+This means you can ask it things like:
 
 - *"Why did Morning Summary fail?"*
-- *"Write a cron expression for every weekday at 9am"*
 - *"What did the Robotics Briefing output last time?"*
+- *"Write a cron expression for every weekday at 9am"*
+- *"How do I add an Ollama job?"*
 
 ### Configure in `config.toml`
 
 ```toml
 [chat]
-backend = "ollama"              # or "anthropic", "openai", "lmstudio"
-model   = "qwen3:8b"
+backend = "ollama"                        # or "anthropic", "openai", "lmstudio"
+model   = "qwen3:8b"                      # any model your backend supports
 system  = "You are Talon's assistant."   # optional — overrides the default system prompt
 ```
 
-The chat agent uses the same pluggable backend system as scheduled agent jobs. Conversation history is kept in memory for the session (cleared on restart). No extra dependencies required.
+The `[chat]` block is optional. If omitted, the Chat tab shows a config hint instead of the input UI.
+
+**Config fields:**
+
+| Field          | Required | Description                                               |
+|----------------|----------|-----------------------------------------------------------|
+| `chat.backend` | yes      | `anthropic`, `openai`, `ollama`, or `lmstudio`            |
+| `chat.model`   | yes      | Model name, e.g. `qwen3:8b`, `claude-haiku-4-5`           |
+| `chat.system`  | no       | Custom system prompt — job context is always appended     |
+
+### Details
+
+- Uses the same pluggable `Backend` trait as scheduled agent jobs
+- Each message sends the **full conversation history** to the model — multi-turn by default
+- Job status (schedule, last run time, last output) is injected into the system prompt automatically on every turn
+- Conversation history is kept in memory for the session and cleared on restart
+- `GET /api/chat` returns the current history as JSON
+
+### Test without a real backend
+
+```sh
+cargo run -- --mock
+```
+
+In mock mode, a built-in echo backend responds to every message so you can see the full chat UI working without a running model.
 
 ---
 
