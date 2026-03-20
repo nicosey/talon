@@ -102,6 +102,21 @@ impl Backend for OpenAiBackend {
     }
 }
 
+// ── Mock backend (used in --mock mode) ───────────────────────────────────────
+
+pub struct MockBackend;
+
+#[async_trait]
+impl Backend for MockBackend {
+    async fn chat(&self, _system: Option<&str>, messages: &[ChatMessage]) -> Result<String> {
+        let last = messages.last().map(|m| m.content.as_str()).unwrap_or("");
+        Ok(format!(
+            "[mock] You said: \"{}\"\n\nThis is a mock response. Configure a real backend with [chat] in config.toml.",
+            last
+        ))
+    }
+}
+
 // ── Factory ───────────────────────────────────────────────────────────────────
 
 /// Build a backend by name. Used by both scheduled agent jobs and the chat endpoint.
@@ -122,6 +137,7 @@ pub fn build_backend(backend: &str, model: &str, config: &Config) -> Result<Box<
                 model: model.to_string(),
             }))
         }
+        "mock" => Ok(Box::new(MockBackend)),
         other => anyhow::bail!(
             "Unknown backend '{}'. Valid options: anthropic, openai, ollama, lmstudio", other
         ),

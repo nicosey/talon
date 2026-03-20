@@ -26,7 +26,16 @@ async fn main() -> Result<()> {
     if mock {
         info!("🦅 Talon started in mock mode — web UI only, no jobs will run");
         web::seed_mock_state(&state).await;
-        web::start(state, web_config).await?;
+        // Enable the chat tab in mock mode even without a real [chat] config
+        let mut mock_config = config.clone();
+        if mock_config.chat.is_none() {
+            mock_config.chat = Some(config::ChatConfig {
+                backend: "mock".to_string(),
+                model: "mock".to_string(),
+                system: None,
+            });
+        }
+        web::start(state, Arc::new(mock_config)).await?;
     } else {
         info!("🦅 Talon started");
         let (sched_result, web_result) = tokio::join!(

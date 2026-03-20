@@ -218,19 +218,20 @@ system  = "You are Talon's assistant."  # optional</pre>"#.to_string()
   <title>Talon</title>
   <style>
     *, *::before, *::after {{ box-sizing: border-box; }}
-    body {{ margin: 0; font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9; }}
-    header {{ padding: 1.2rem 2rem; border-bottom: 1px solid #21262d; display: flex; align-items: center; gap: 0.6rem; }}
+    body {{ margin: 0; font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9;
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden; }}
+    header {{ padding: 1.2rem 2rem; border-bottom: 1px solid #21262d; display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }}
     header h1 {{ margin: 0; font-size: 1.5rem; color: #f0f6fc; }}
     .subtitle {{ color: #8b949e; font-size: 1rem; margin-left: auto; }}
     .logo {{ display: flex; align-items: center; gap: 0.5rem; }}
     .logo svg {{ flex-shrink: 0; }}
     /* tabs */
-    .tabs {{ display: flex; border-bottom: 1px solid #21262d; padding: 0 2rem; }}
+    .tabs {{ display: flex; border-bottom: 1px solid #21262d; padding: 0 2rem; flex-shrink: 0; }}
     .tab {{ background: none; border: none; border-bottom: 2px solid transparent; padding: 0.75rem 1.25rem;
              color: #8b949e; cursor: pointer; font-size: 1rem; margin-bottom: -1px; }}
     .tab.active {{ color: #3fb950; border-bottom-color: #3fb950; }}
     /* jobs tab */
-    #jobs-tab {{ padding: 2rem; }}
+    #jobs-tab {{ padding: 2rem; flex: 1; overflow-y: auto; }}
     table {{ width: 100%; border-collapse: collapse; font-size: 1rem; }}
     th {{ text-align: left; padding: 0.6rem 0.75rem; font-size: 0.85rem; text-transform: uppercase;
           letter-spacing: 0.05em; color: #8b949e; border-bottom: 1px solid #21262d; }}
@@ -245,8 +246,8 @@ system  = "You are Talon's assistant."  # optional</pre>"#.to_string()
     .badge.pending {{ background: #21262d; color: #8b949e; }}
     #last-refresh {{ color: #8b949e; font-size: 0.9rem; }}
     /* chat tab */
-    #chat-tab {{ display: none; flex-direction: column; height: calc(100vh - 112px); padding: 1.5rem 2rem; gap: 1rem; }}
-    #messages {{ flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; padding-bottom: 0.5rem; }}
+    #chat-tab {{ display: none; flex-direction: column; flex: 1; min-height: 0; padding: 1.5rem 2rem; gap: 1rem; }}
+    #messages {{ flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; padding-bottom: 0.5rem; }}
     .msg {{ max-width: 72%; padding: 0.75rem 1rem; border-radius: 12px; line-height: 1.6; font-size: 1rem; white-space: pre-wrap; word-break: break-word; }}
     .msg.user      {{ align-self: flex-end; background: #1a4731; color: #e6f4ea; border-radius: 12px 12px 2px 12px; }}
     .msg.assistant {{ align-self: flex-start; background: #161b22; color: #c9d1d9; border: 1px solid #21262d; border-radius: 12px 12px 12px 2px; }}
