@@ -118,6 +118,28 @@ Open `http://localhost:3030` to see the dashboard. The JSON feed is available at
 
 ---
 
+## CLI reference
+
+| Command                    | Description                                              |
+|----------------------------|----------------------------------------------------------|
+| `talon`                    | Start the scheduler and web dashboard                    |
+| `talon --mock`             | Start web UI only with fake data — no jobs run           |
+| `talon run <name>`         | Run a single job by name and exit                        |
+
+### `talon run`
+
+Runs one job immediately without starting the scheduler or web server. Useful for testing a new job or debugging a failure.
+
+```sh
+talon run "Robotics Briefing"   # exact name (quoted)
+talon run Robotics Briefing     # multi-word without quotes
+talon run robotics briefing     # case-insensitive
+```
+
+Output is printed to stdout. Exit code is `0` on success, `1` on failure. If the name doesn't match, available job names are listed.
+
+---
+
 ## Chat agent
 
 Talon includes a built-in chat agent accessible from the **Chat** tab in the web dashboard. It starts automatically with Talon — no separate process, no extra setup beyond adding `[chat]` to your config.
